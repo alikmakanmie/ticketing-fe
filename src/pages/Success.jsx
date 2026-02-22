@@ -1,59 +1,87 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBooking } from "../context/BookingContext";
-import { useEffect } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 
-function Success() {
+export default function Success() {
   const navigate = useNavigate();
-  const { booking } = useBooking();
+  const { booking, setBooking } = useBooking();
 
   useEffect(() => {
-    if (!booking) {
-      navigate("/");
-    }
+    if (!booking) navigate("/");
   }, [booking, navigate]);
 
   if (!booking) return null;
 
-  const { seats, total } = booking;
-
-  const ticketData = JSON.stringify({
-    event: "Kancah Seni 2026",
-    seats: seats.map((seat) => seat.seat_number),
-    total,
-    issued_at: new Date().toISOString(),
+  const qrData = booking.orderCode ?? JSON.stringify({
+    seats: booking.seats.map((s) => s.seat_code),
   });
 
+  const handleGoHome = () => {
+    setBooking(null);
+    navigate("/");
+  };
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6 text-green-600">
-        Pembayaran Berhasil 🎉
-      </h1>
+    <div className="max-w-lg mx-auto px-6 py-10 text-center">
+      {/* Success Icon */}
+      <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+        <span className="text-4xl">✅</span>
+      </div>
+      <h1 className="text-3xl font-bold text-white mb-2">Pemesanan Berhasil!</h1>
+      <p className="text-gray-400 mb-8">
+        {booking.simulated
+          ? "Simulasi pembayaran selesai. Di produksi tiket diterbitkan setelah admin verifikasi."
+          : "Pembayaran sedang diverifikasi oleh tim kami."}
+      </p>
 
-      <div className="bg-white p-6 rounded shadow-md max-w-md text-center">
-        <h2 className="text-xl font-semibold mb-4">E-Ticket</h2>
-
-        <QRCodeCanvas value={ticketData} size={200} />
-
-        <div className="mt-4">
-          <p className="font-semibold">
-            Kursi: {seats.map((seat) => seat.seat_number).join(", ")}
-          </p>
-
-          <p className="mt-2">
-            Total: Rp {total.toLocaleString("id-ID")}
-          </p>
+      {/* E-Ticket Card */}
+      <div className="bg-gray-800/60 border border-white/10 rounded-3xl p-6 mb-6 text-left">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">E-Ticket</p>
+            <p className="text-white font-bold text-lg">🎟️ TiketIn</p>
+          </div>
+          <span className="bg-green-500/20 text-green-400 text-xs px-3 py-1 rounded-full font-semibold">
+            ISSUED
+          </span>
         </div>
 
-        <button
-          onClick={() => navigate("/")}
-          className="mt-6 w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Kembali ke Home
-        </button>
+        {/* QR Code */}
+        <div className="flex justify-center mb-5 bg-white rounded-2xl p-4 w-fit mx-auto">
+          <QRCodeCanvas value={qrData} size={160} />
+        </div>
+        <p className="text-center text-xs text-gray-500 mb-4">Tunjukkan QR ini di gate masuk</p>
+
+        {/* Ticket Details */}
+        <div className="space-y-2 text-sm">
+          {booking.orderCode && (
+            <div className="flex justify-between">
+              <span className="text-gray-400">Kode Order</span>
+              <span className="text-white font-mono font-bold">{booking.orderCode}</span>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span className="text-gray-400">Kursi</span>
+            <span className="text-white font-semibold">
+              {booking.seats.map((s) => s.seat_code).join(", ")}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-400">Total Bayar</span>
+            <span className="text-violet-300 font-bold">
+              Rp {(booking.totalAmount ?? booking.total ?? 0).toLocaleString("id-ID")}
+            </span>
+          </div>
+        </div>
       </div>
+
+      <button
+        onClick={handleGoHome}
+        className="w-full bg-violet-600 hover:bg-violet-500 text-white font-semibold py-3 rounded-2xl transition-colors"
+      >
+        Kembali ke Beranda
+      </button>
     </div>
   );
 }
-
-export default Success;

@@ -38,30 +38,30 @@ function SeatMap() {
     setSelectedSeats([...selectedSeats, seat]);
   };
 
-    const handleBooking = async () => {
+  const handleBooking = async () => {
     if (selectedSeats.length === 0) return;
 
     try {
-        setLoading(true);
+      setLoading(true);
 
-        const seatIds = selectedSeats.map((seat) => seat.id);
-        const response = await lockSeats(seatIds);
+      const seatIds = selectedSeats.map((seat) => seat.id);
+      const response = await lockSeats(1, seatIds);
 
-        setBooking({
+      setBooking({
         seats: selectedSeats,
         total: selectedSeats.length * 100000,
         bookingCode: response.booking_code,
         expiredAt: response.expired_at,
-        });
+      });
 
-        navigate("/checkout");
+      navigate("/checkout");
 
     } catch (error) {
-        alert(error.message);
+      alert(error.message);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-    };
+  };
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">Seat Map</h1>
@@ -90,13 +90,13 @@ function SeatMap() {
         </p>
       </div>
 
-        <button
+      <button
         onClick={handleBooking}
         disabled={selectedSeats.length === 0 || loading}
         className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-        >
+      >
         {loading ? "Memproses..." : "Pesan Sekarang"}
-        </button>
+      </button>
     </div>
   );
 }

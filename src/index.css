@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0f0f0f; }
+::-webkit-scrollbar-thumb { background: #4c1d95; border-radius: 3px; }
+
+/* Smooth page transitions */
+* { box-sizing: border-box; }
+body { background-color: #030712; }
